@@ -3,6 +3,9 @@ using Magic.IndexedDb.Helpers;
 using Magic.IndexedDb.Models;
 using Magic.IndexedDb.SchemaAnnotations;
 using Microsoft.JSInterop;
+using System.Linq.Expressions;
+using System.Reflection;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 
 namespace Magic.IndexedDb
