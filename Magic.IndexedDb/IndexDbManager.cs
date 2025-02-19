@@ -3,12 +3,7 @@ using Magic.IndexedDb.Helpers;
 using Magic.IndexedDb.Models;
 using Magic.IndexedDb.SchemaAnnotations;
 using Microsoft.JSInterop;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Serialization;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace Magic.IndexedDb
 {
@@ -241,7 +236,7 @@ namespace Magic.IndexedDb
             string? jsonQueryAdditions = null;
             if (query != null && query.storedMagicQueries != null && query.storedMagicQueries.Count > 0)
             {
-                jsonQueryAdditions = Newtonsoft.Json.JsonConvert.SerializeObject(query.storedMagicQueries.ToArray());
+                jsonQueryAdditions = MagicSerializationHelper.SerializeObject(query.storedMagicQueries.ToArray());
             }
             return
                 await this.CallJsAsync<IList<T>>
@@ -276,9 +271,13 @@ namespace Magic.IndexedDb
 
         private string GetJsonQueryFromExpression<T>(Expression<Func<T, bool>> predicate) where T : class
         {
-            var serializerSettings = new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() };
-            var conditions = new List<JObject>();
-            var orConditions = new List<List<JObject>>();
+            var serializerSettings = new MagicJsonSerializationSettings
+            {
+                UseCamelCase = true // Equivalent to setting CamelCasePropertyNamesContractResolver
+            };
+
+            var conditions = new List<JsonObject>();
+            var orConditions = new List<List<JsonObject>>();
 
             void TraverseExpression(Expression expression, bool inOrBranch = false)
             {
@@ -422,14 +421,14 @@ namespace Magic.IndexedDb
                             columnName = propertyInfo.GetPropertyColumnName<MagicPrimaryKeyAttribute>();
 
                         bool _isString = false;
-                        JToken? valSend = null;
+                        JsonNode? valSend = null;
                         if (right != null && right.Value != null)
                         {
-                            valSend = JToken.FromObject(right.Value);
+                            valSend = JsonValue.Create(right.Value);
                             _isString = right.Value is string;
                         }
 
-                        var jsonCondition = new JObject
+                        var jsonCondition = new JsonObject
             {
                 { "property", columnName },
                 { "operation", operation },
@@ -443,7 +442,7 @@ namespace Magic.IndexedDb
                             var currentOrConditions = orConditions.LastOrDefault();
                             if (currentOrConditions == null)
                             {
-                                currentOrConditions = new List<JObject>();
+                                currentOrConditions = new List<JsonObject>();
                                 orConditions.Add(currentOrConditions);
                             }
                             currentOrConditions.Add(jsonCondition);
@@ -463,7 +462,7 @@ namespace Magic.IndexedDb
                 orConditions.Add(conditions);
             }
 
-            return JsonConvert.SerializeObject(orConditions, serializerSettings);
+            return MagicSerializationHelper.SerializeObject(orConditions, serializerSettings);
         }
 
         /// <summary>
