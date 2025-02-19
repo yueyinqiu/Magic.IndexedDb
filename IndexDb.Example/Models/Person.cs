@@ -4,34 +4,31 @@ using System.Text.Json.Serialization;
 
 namespace IndexDb.Example
 {
-    [MagicTable("Person", null)]
+    [MagicTable("Person", DbNames.Client)]
     public class Person
     {
-        [MagicPrimaryKey]
+        [MagicPrimaryKey("id")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public int _Id { get; set; }
 
         [MagicIndex]
         public string Name { get; set; }
 
-        [MagicIndex]
-        [JsonPropertyName("Age")]
+        [MagicIndex("Age")]
         public int _Age { get; set; }
 
-        [MagicIndex]
         public int TestInt { get; set; }
 
-        [MagicUniqueIndex]
-        [JsonPropertyName("Guid")]
+        [MagicUniqueIndex("Guid")]
         public Guid GUIY { get; set; } = Guid.NewGuid();
 
         [MagicEncrypt]
         public string Secret { get; set; }
 
-        [JsonIgnore]
+        [MagicNotMapped]
         public string DoNotMapTest { get; set; }
 
-        [JsonIgnore]
+        [MagicNotMapped]
         public string SecretDecrypted { get; set; }
 
         private bool testPrivate { get; set; } = false;

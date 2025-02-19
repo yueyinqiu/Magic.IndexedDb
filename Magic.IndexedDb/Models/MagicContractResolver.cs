@@ -11,28 +11,32 @@ using System.Threading.Tasks;
 
 namespace Magic.IndexedDb.Models
 {
-    internal class MagicContractResolver<T> : JsonConverter<T>
+    internal class MagicContractResolver : JsonConverter<object>
     {
         private static readonly ConcurrentDictionary<MemberInfo, bool> _cachedIgnoredProperties = new();
 
-        public override T? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override bool CanConvert(Type typeToConvert)
         {
-            return JsonSerializer.Deserialize<T>(ref reader, options);
+            return typeToConvert.GetCustomAttribute<MagicTableAttribute>() is not null;
         }
 
-        public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
+        public override object? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            return JsonSerializer.Deserialize(ref reader, typeToConvert, options);
+        }
+
+        public override void Write(Utf8JsonWriter writer, object value, JsonSerializerOptions options)
         {
             if (value == null) return;
 
             writer.WriteStartObject();
 
-            foreach (var property in typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            foreach (var property in value.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
                 // Check cache first
                 if (!_cachedIgnoredProperties.TryGetValue(property, out bool shouldIgnore))
                 {
-                    shouldIgnore = property.GetCustomAttributes(inherit: true)
-                                           .Any(a => a.GetType().FullName == typeof(MagicNotMappedAttribute).FullName);
+                    shouldIgnore = property.GetCustomAttribute<MagicNotMappedAttribute>() is null;
                     _cachedIgnoredProperties[property] = shouldIgnore;
                 }
 

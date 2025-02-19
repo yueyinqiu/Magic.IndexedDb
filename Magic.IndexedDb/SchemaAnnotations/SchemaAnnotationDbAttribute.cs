@@ -1,15 +1,21 @@
-﻿namespace Magic.IndexedDb
+﻿using Magic.IndexedDb.Helpers;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Magic.IndexedDb
 {
-    [AttributeUsage(AttributeTargets.Class)]
-    public sealed class MagicTableAttribute : Attribute
+    public class MagicTableAttribute : Attribute
     {
         public string SchemaName { get; }
-        public string? DatabaseName { get; }
+        public string DatabaseName { get; }
 
-        public MagicTableAttribute(string schemaName, string? databaseName)
+        public MagicTableAttribute(string schemaName, string databaseName = SchemaHelper.defaultNone)
         {
-            this.SchemaName = schemaName;
-            this.DatabaseName = databaseName;
+            SchemaName = schemaName;
+            DatabaseName = databaseName;
         }
     }
 }

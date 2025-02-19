@@ -72,7 +72,7 @@ namespace Magic.IndexedDb.Helpers
                         else
                             DbName = defaultNone;
 
-                        if (schemaAttribute.DatabaseName.Equals(DbName))
+                        if (schemaAttribute.DatabaseName == DbName)
                         {
                             //var schema = typeof(SchemaHelper).GetMethod("GetStoreSchema").MakeGenericMethod(type).Invoke(null, new object[] { }) as StoreSchema;
                             var schema = GetStoreSchema(type);

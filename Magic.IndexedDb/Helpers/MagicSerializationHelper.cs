@@ -17,9 +17,7 @@ namespace Magic.IndexedDb.Helpers
             if (value == null)
                 throw new ArgumentNullException(nameof(value), "Object cannot be null");
 
-            var options = settings.GetOptionsWithResolver<T>(); // Ensure the correct resolver is applied
-
-            return JsonSerializer.Serialize(value, options);
+            return JsonSerializer.Serialize(value, settings.Options);
         }
 
         public static T? DeserializeObject<T>(string json, MagicJsonSerializationSettings? settings = null)
@@ -30,9 +28,7 @@ namespace Magic.IndexedDb.Helpers
             if (settings == null)
                 settings = new MagicJsonSerializationSettings();
 
-            var options = settings.GetOptionsWithResolver<T>(); // Ensure correct resolver for deserialization
-
-            return JsonSerializer.Deserialize<T>(json, options);
+            return JsonSerializer.Deserialize<T>(json, settings.Options);
         }
 
         public static void PopulateObject<T>(T source, T target)
